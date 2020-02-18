@@ -4,7 +4,10 @@ from geopy import distance
 import pandas
 import geopy
 import folium
-
+geolocator = geopy.geocoders.Nominatim(
+        user_agent="specify_your_app_name_here", timeout=1)
+geocode = geopy.extra.rate_limiter.RateLimiter(
+        geolocator.geocode, min_delay_seconds=0.01)
 
 
 def read_file(year):
@@ -13,7 +16,8 @@ def read_file(year):
     Read file and and return list of lists 
     which name of the film and its location, starred in given year
     """
-    data = pandas.read_csv("locations.csv", error_bad_lines=False)
+    data = pandas.read_csv(
+        "locations.csv", error_bad_lines=False, warn_bad_lines=False)
     movie = data['movie']
     years = data['year']
     locations = data['location']
@@ -33,10 +37,6 @@ def find_cordinates(lst):
     Find cordinates of locations and return list
     of lists with name of film and its location
     """
-    geolocator = geopy.geocoders.Nominatim(
-        user_agent="specify_your_app_name_here", timeout=1)
-    geocode = geopy.extra.rate_limiter.RateLimiter(
-        geolocator.geocode, min_delay_seconds=0.01)
     ans = []
     counter = 0
     for l in lst:
@@ -46,7 +46,7 @@ def find_cordinates(lst):
             counter += 1
         except:
             pass
-        if counter == 15:
+        if counter == 300:
             break
     return ans
 
@@ -92,10 +92,11 @@ def map_creation():
 
     user_map.add_child(films_layer)
     user_map.add_child(new_layer)
+    user_map.add_child(folium.LayerControl())
     user_map.save("Map.html")
 
     print("Finished. Please have look at the map Map.html")
 
+
 if __name__ == "__main__":
     map_creation()
-
